@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/styles.css">
+        
+
+        <script src="js/lib/modernizr-2.6.2.min.js"></script>
+
+    </head>
+    <body>
+
+    <!--Code from Codepen-->
+        <div class="container">
+  <div class="row">
+    <div class="box col-sm-4">
+      <div id="bb1" class="bb">
+        <div>
+          <input type="text" id="boxInput" placeholder="Box Name">
+          <input type="submit" id="boxSubmit">
+        </div>
+        <div>
+          <input type="text" id="itemInput" placeholder="Item Name">
+          <input type="submit" id="itemSubmit">
+        </div>
+      </div>
+    </div>
+    <div class="box col-sm-4">
+      <div id="bb2" class="bb">
+        <ul id="boxList">
+        </div>
+      </ul>
+    </div>
+    <div class="box col-sm-4">
+      <div id="bb3" class="bb">
+        <ul id="itemList">
+        </div>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+<script id="boxListItem" type="text/html">
+    <li id="<%= id %>" class="boxName">
+        <%= name %>
+        <button class="funcButtons btn-danger" data-which="box" data-target="<%= id %>">Delete</button>
+    </li>
+</script>
+
+<script id="itemListItem" type="text/html">
+    <li id="<%= id %>" class="itemName">
+        <%= name %>
+        <button class="funcButtons btn-danger" data-which="item" data-target="<%= id %>">Delete</button>
+        <button class="funcButtons btn-info" data-which="item" data-target="<%= id %>">Move</button>
+    </li>
+</script>
+
+        <!--Codepen End-->
+
+        <script src="js/lib/jquery-min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="js/lib/underscore-min.js"></script>
+        <script src="js/lib/backbone-min.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>
