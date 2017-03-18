@@ -105,6 +105,11 @@ li.selected {
   color: white;
 }
 
+li.move {
+  background-color: blue;
+  color: white;
+}
+
 .funcButtons {
     float: right;
     font-size: 12px;

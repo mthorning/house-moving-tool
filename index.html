@@ -51,17 +51,17 @@
 
 
 <script id="boxListItem" type="text/html">
-    <li id="<%= id %>" class="boxName">
+    <li data-target="<%= id %>" id="<%= id %>" class="boxName">
         <%= name %>
-        <button class="funcButtons btn-danger" data-which="box" data-target="<%= id %>">Delete</button>
+        <button class="delete funcButtons btn-danger" data-target="<%= id %>">Delete</button>
     </li>
 </script>
 
 <script id="itemListItem" type="text/html">
-    <li id="<%= id %>" class="itemName">
+    <li data-target="<%= id %>" id="<%= id %>" class="itemName">
         <%= name %>
-        <button class="funcButtons btn-danger" data-which="item" data-target="<%= id %>">Delete</button>
-        <button class="funcButtons btn-info" data-which="item" data-target="<%= id %>">Move</button>
+        <button class="delete funcButtons btn-danger" data-target="<%= id %>">Delete</button>
+        <button class="move funcButtons btn-info" data-which="item" data-target="<%= id %>">Move</button>
     </li>
 </script>
 

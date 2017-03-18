@@ -28,12 +28,15 @@ var ItemView = Backbone.View.extend({
 var ItemsView = Backbone.View.extend({
 
   events: {
-    'click .itemName': 'onListClick'
+    'click .itemName': 'onListClick',
+    'click .delete': 'onDeleteButtonClick',
+    'click .move': 'onMoveButtonClick'
   },
 
   initialize: function() {
     this.model.on('add', this.onItemAdd, this);
     this.model.on('remove', this.onItemRemove, this);
+    this.model.on('change', this.render, this);
   },
 
   render: function(box) {
@@ -57,10 +60,33 @@ var ItemsView = Backbone.View.extend({
   },
 
   onListClick: function(e) {
-    document.querySelectorAll('.itemName').forEach(function(li) {
-      li.classList.remove('selected');
-    });
-    e.target.classList.add('selected');
+    if(moveMode) {
+      e.target.classList.add('move');
+      this.addToMoveList(e);
+    } else {
+      document.querySelectorAll('.itemName').forEach(function(li) {
+        li.classList.remove('selected');
+      });
+      e.target.classList.add('selected');
+    }
+  },
+
+  onDeleteButtonClick: function(e) {
+    var id = parseInt(e.target.getAttribute('data-target'));
+    items.remove(items.where({ id: id }));
+  },
+
+  addToMoveList: function(element) {
+    var id = parseInt(element.target.getAttribute('data-target'));
+    moveList.push(id);
+  },
+
+  onMoveButtonClick: function(e) {
+    e.stopPropagation();
+    e.target.parentNode.classList.remove('selected');
+    e.target.parentNode.classList.add('move');
+    this.addToMoveList(e);
+    moveMode = true;
   }
 
 });
@@ -79,7 +105,8 @@ var BoxView = Backbone.View.extend({
 var BoxesView = Backbone.View.extend({
   
   events: {
-    'click .boxName': 'onListClick'
+    'click .boxName': 'onListClick',
+    'click .delete': 'onDeleteButtonClick'
   },
   
   initialize: function() {
@@ -105,13 +132,29 @@ var BoxesView = Backbone.View.extend({
   },
   
   onListClick: function(e) {
-    document.querySelectorAll('.boxName').forEach(function(li) {
-      li.classList.remove('selected');
-    });
-    e.target.classList.add('selected');
-    var id = parseInt(e.target.id);
-    itemsView.render(id);
+    if(moveMode) {
+      var selectedBox = parseInt(e.target.id);
+      items.each(function(item) {
+        if(moveList.indexOf(item.get('id')) >= 0) {
+          item.set('box', selectedBox);
+        }
+      });
+      moveMode = false;
+    } 
+      document.querySelectorAll('.boxName').forEach(function(li) {
+        li.classList.remove('selected');
+      });
+      e.target.classList.add('selected');
+      var id = parseInt(e.target.id);
+      itemsView.render(id);
+  },
+
+  onDeleteButtonClick: function(e) {
+    var id = parseInt(e.target.getAttribute('data-target'));
+    boxes.remove(boxes.where({ id: id }));
+    items.remove(items.where({ box: id }));
   }
+
 });
 
 //INPUTS
@@ -126,21 +169,6 @@ var newId = (function() {
     return count++;
   }
 })()
-
-
-
-document.querySelector('.row').addEventListener('click', function(e) {
-  if(e.target.classList.contains('delete')) {
-    var id = parseInt(e.target.getAttribute('data-target'));
-
-    if(e.target.getAttribute('data-which') === 'box') {
-      boxes.remove(boxes.where({ id: id }));
-      items.remove(items.where({ box: id }));
-    } else {
-      items.remove(items.where({ id: id }));
-    }
-  }
-});
 
 boxSubmit.addEventListener('click', function() {
   var name = boxInput.value;
@@ -172,7 +200,6 @@ itemSubmit.addEventListener('click', function() {
 });
 
 //Test
-
 var boxes = new Boxes([
   new Box({ name: 'Bathroom' }),
   new Box({ name: 'Bedroom 1' }),
@@ -180,11 +207,6 @@ var boxes = new Boxes([
   new Box({ name: 'Living Room' }),
   new Box({ name: 'Kitchen' })
 ]);
-
-boxes.each(function(box) {
-  var id = newId();
-  box.set('id', id);
-});
 
 var items = new Items([
   new Item({ name: 'toothbrush', box: 1}),
@@ -202,13 +224,21 @@ var items = new Items([
   new Item({ name: 'kitchen roll', box: 5 })
 ]);
 
-items.each(function(item) {
-  var id = newId();
-  item.set('id', id);
-});
+createIds(boxes);
+createIds(items);
+
+
+function createIds(arr) {
+  arr.each(function(el) {
+    var id = newId();
+    el.set('id', id);
+  });
+}
 
 //Init
 var boxesView = new BoxesView({ el: '#boxList', model: boxes });
 var itemsView = new ItemsView({ el: '#itemList', model: items });
+var moveMode = false;
+var moveList = [];
 
 boxesView.render();
