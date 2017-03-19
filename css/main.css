@@ -125,7 +125,23 @@ li.selected > .funcButtons {
 input[type="text"] {
     width: 60%;
 }
+#allItemsBox {
+    color: gray;
+    display: none;
+}
 
+#deleteBox {
+    background-color: red;
+    color: white;
+    display: none;
+}
+.functionBoxes {
+    border-bottom: 1px solid gray;
+    margin-bottom: 3px;
+}
+.functionBoxes > button {
+    visibility: hidden;
+}
 
 
 

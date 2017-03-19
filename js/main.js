@@ -43,7 +43,7 @@ var ItemsView = Backbone.View.extend({
     this.$el.html('');
     var self = this;
     this.model.each(function(item) {
-      if(item.get('box') === box) {
+      if(item.get('box') === parseInt(box) || box === 'allItemsBox' ) {
         var itemView = new ItemView({ model: item});
         self.$el.append(itemView.render().$el);
       }
@@ -51,18 +51,24 @@ var ItemsView = Backbone.View.extend({
   },
 
   onItemAdd: function(item) {
+    if(this.model.length === 1) {
+      $('#allItemsBox').show();
+    }
     var itemView = new ItemView({ model: item });
     this.$el.append(itemView.render().$el);
   },
 
   onItemRemove: function(item) {
+    if(this.model.length === 0) {
+      $('#allItemsBox').hide();
+    }
     this.$('#' + item.get('id')).remove();
   },
 
   onListClick: function(e) {
     if(moveMode) {
-      e.target.classList.add('move');
-      this.addToMoveList(e);
+      e.target.classList.toggle('move');
+      this.moveListUpdate(e.target.id);
     } else {
       document.querySelectorAll('.itemName').forEach(function(li) {
         li.classList.remove('selected');
@@ -71,21 +77,30 @@ var ItemsView = Backbone.View.extend({
     }
   },
 
+  moveListUpdate: function(id) {
+    if(id) {
+      id = parseInt(id);
+      var i = moveList.indexOf(id);
+      if(i === -1) {
+        moveList.push(id);
+      } else {
+        moveList.splice(i, 1);
+      }
+    }
+  },
+
   onDeleteButtonClick: function(e) {
     var id = parseInt(e.target.getAttribute('data-target'));
     items.remove(items.where({ id: id }));
-  },
-
-  addToMoveList: function(element) {
-    var id = parseInt(element.target.getAttribute('data-target'));
-    moveList.push(id);
   },
 
   onMoveButtonClick: function(e) {
     e.stopPropagation();
     e.target.parentNode.classList.remove('selected');
     e.target.parentNode.classList.add('move');
-    this.addToMoveList(e);
+    this.moveListUpdate(e.target.parentNode.id);
+    $('#deleteBox').show();
+    $('#allItemsBox').hide();
     moveMode = true;
   }
 
@@ -133,19 +148,34 @@ var BoxesView = Backbone.View.extend({
   
   onListClick: function(e) {
     if(moveMode) {
-      var selectedBox = parseInt(e.target.id);
-      items.each(function(item) {
-        if(moveList.indexOf(item.get('id')) >= 0) {
-          item.set('box', selectedBox);
-        }
-      });
+
+      if(e.target.id === 'deleteBox') {
+        moveList.forEach(function(id) {
+          items.remove(items.where({ id: id }));
+        })
+      } else {
+
+        var selectedBox = parseInt(e.target.id);
+
+        items.each(function(item) {
+
+          if(moveList.indexOf(item.get('id')) >= 0) {
+            item.set('box', selectedBox);
+          }
+
+        });
+      }
+
+      $('#deleteBox').hide();
+      $('#allItemsBox').show();
+      moveList = [];
       moveMode = false;
     } 
       document.querySelectorAll('.boxName').forEach(function(li) {
         li.classList.remove('selected');
       });
       e.target.classList.add('selected');
-      var id = parseInt(e.target.id);
+      var id = e.target.id;
       itemsView.render(id);
   },
 
@@ -185,13 +215,17 @@ itemSubmit.addEventListener('click', function() {
   var name = itemInput.value;
   if(name) {
     var id = newId();
-    var selection;
+    var selection = document.querySelector('.selected');
+    var box = selection.getAttribute('id');
 
-    if(selection = document.querySelector('.selected')) {
-      var box = parseInt(selection.getAttribute('id'));
-      var newItem = new Item({ id: id, name: name, box: box });
-      items.add(newItem);
-      itemInput.value='';
+    if(selection) {
+      if(box !== 'allItemsBox') {
+        var newItem = new Item({ id: id, name: name, box: parseInt(box) });
+        items.add(newItem);
+        itemInput.value='';
+      } else {
+        alert('Items cannot be added to the \'all items\' box');
+      }
     } else {
       alert('Please select a box to put item in');
     }
@@ -240,5 +274,8 @@ var boxesView = new BoxesView({ el: '#boxList', model: boxes });
 var itemsView = new ItemsView({ el: '#itemList', model: items });
 var moveMode = false;
 var moveList = [];
+if(items.length > 0) {
+  $('#allItemsBox').show();
+}
 
 boxesView.render();
